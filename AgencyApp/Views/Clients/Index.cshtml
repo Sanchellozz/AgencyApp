@@ -1,4 +1,5 @@
 ﻿@model IEnumerable<AgencyApp.Models.Client>
+@namespace AgencyApp.Data
 
 @{
     ViewData["Title"] = "Index";
@@ -19,9 +20,6 @@
                 @Html.DisplayNameFor(model => model.License)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.User)
-            </th>
-            <th>
                 @Html.DisplayNameFor(model => model.FirstName)
             </th>
             <th>
@@ -37,10 +35,7 @@
                 @Html.DisplayFor(modelItem => item.Passport)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.License.Id)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.User.Id)
+                @Html.DisplayFor(modelItem => item.License.Name)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.FirstName)

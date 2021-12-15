@@ -7,23 +7,26 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using AgencyApp.Data;
 using AgencyApp.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace AgencyApp.Controllers
 {
     public class AgentsController : Controller
     {
         private readonly AgencyDBContext _context;
+        UserManager<User> _userManager;
 
-        public AgentsController(AgencyDBContext context)
+        public AgentsController(AgencyDBContext context, UserManager<User> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Agents
         public async Task<IActionResult> Index()
         {
-            var agencyDBContext = _context.Agents.Include(a => a.Degree).Include(a => a.User);
-            return View(await agencyDBContext.ToListAsync());
+            var agents = _context.Agents.Include(a => a.Degree);
+            return View(await agents.ToListAsync());
         }
 
         // GET: Agents/Details/5
@@ -35,8 +38,6 @@ namespace AgencyApp.Controllers
             }
 
             var agent = await _context.Agents
-                .Include(a => a.Degree)
-                .Include(a => a.User)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (agent == null)
             {
@@ -49,8 +50,8 @@ namespace AgencyApp.Controllers
         // GET: Agents/Create
         public IActionResult Create()
         {
-            ViewData["DegreeId"] = new SelectList(_context.Degrees, "id", "id");
-            ViewData["UserID"] = new SelectList(_context.Set<User>(), "Id", "Id");
+            ViewData["DegreeId"] = new SelectList(_context.Degrees, "id", "name");
+            ViewData["UserID"] = new SelectList(_userManager.Users, "Id", "UserName");
             return View();
         }
 
@@ -85,8 +86,6 @@ namespace AgencyApp.Controllers
             {
                 return NotFound();
             }
-            ViewData["DegreeId"] = new SelectList(_context.Degrees, "id", "id", agent.DegreeId);
-            ViewData["UserID"] = new SelectList(_context.Set<User>(), "Id", "Id", agent.UserID);
             return View(agent);
         }
 
@@ -136,8 +135,6 @@ namespace AgencyApp.Controllers
             }
 
             var agent = await _context.Agents
-                .Include(a => a.Degree)
-                .Include(a => a.User)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (agent == null)
             {

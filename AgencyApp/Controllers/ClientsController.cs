@@ -15,12 +15,14 @@ namespace AgencyApp.Controllers
     [Authorize]
     public class ClientsController : Controller
     {
+        private readonly ApplicationDbContext _Dbcontext;
         private readonly AgencyDBContext _context;
         private readonly ILogger _logger;
         UserManager<User> _userManager;
 
-        public ClientsController(AgencyDBContext context, ILogger<ClientsController> logger, UserManager<User> userManager)
+        public ClientsController(AgencyDBContext context, ApplicationDbContext context1, ILogger<ClientsController> logger, UserManager<User> userManager)
         {
+            _Dbcontext = context1;
             _context = context;
             _logger = logger;
             _userManager = userManager;
@@ -47,9 +49,9 @@ namespace AgencyApp.Controllers
             {
                 return NotFound();
             }
-            var group = await _context.Licenses
+            var license = await _context.Licenses
                 .FirstOrDefaultAsync(m => m.Id == client.LicenseId);
-            if (group == null)
+            if (license == null)
             { return NotFound(); }
 
             return View(client);
@@ -59,7 +61,7 @@ namespace AgencyApp.Controllers
         public IActionResult Create()
         {
             ViewData["LicenseId"] = new SelectList(_context.Licenses, "Id", "Name");
-            ViewData["UserID"] = new SelectList(_userManager.Users, "Id", "UserName");
+            ViewData["UserID"] = new SelectList(_Dbcontext.Users, "Id", "UserName");
             return View();
         }
 
@@ -74,12 +76,11 @@ namespace AgencyApp.Controllers
             {
                 _context.Add(client);
                 await _context.SaveChangesAsync();
-                _logger.LogInformation("Был создан студент");
                 return RedirectToAction(nameof(Index));
 
             }
             ViewData["LicenseId"] = new SelectList(_context.Licenses, "Id", "Id", client.LicenseId);
-            ViewData["UserID"] = new SelectList(_userManager.Users, "Id", "Id", client.UserID);
+            ViewData["UserID"] = new SelectList(_Dbcontext.Users, "Id", "Id", client.UserID);
             return View(client);
         }
 
@@ -96,7 +97,6 @@ namespace AgencyApp.Controllers
             {
                 return NotFound();
             }
-            ViewData["LicenseId"] = new SelectList(_context.Licenses, "Id", "Id", client.LicenseId);
             return View(client);
         }
 
